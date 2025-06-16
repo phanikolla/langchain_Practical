@@ -18,31 +18,30 @@ This repository contains practical implementations and examples of various LangC
 - Understanding the power of composable chains
 - Building complex workflows with simple, readable code
 
-## 🎯 Upcoming Features
+### 3. Tagging and Extraction
+- Named Entity Recognition implementation
+- Information extraction from text
+- Custom tagging implementations
 
-The following features are planned for future implementation:
+### 4. Tools and Routing
+- Custom tool creation and implementation
+- Dynamic routing between different chains
+- Tool selection and execution
 
-- **Tagging and Extraction**
-  - Named Entity Recognition
-  - Information extraction from text
-  - Custom tagging implementations
-
-- **Tools and Routing**
-  - Custom tool creation
-  - Dynamic routing between different chains
-  - Tool selection and execution
-
-- **Conversational Agent**
-  - Building interactive agents
-  - Memory management
-  - Context-aware conversations
+### 5. Conversational Agent
+- Building interactive agents
+- Memory management
+- Context-aware conversations
 
 ## 📋 Project Structure
 
 ```
 langchain_Practical/
 ├── openai_functions.ipynb    # Function calling implementations
-└── lcel.ipynb               # LangChain Expression Language examples
+├── lcel.ipynb               # LangChain Expression Language examples
+├── tagging_extraction.ipynb  # Tagging and extraction examples
+├── tools_routing.ipynb      # Tools and routing implementations
+└── conversational_agent.ipynb # Conversational agent examples
 ```
 
 ## 🚀 Getting Started
@@ -75,6 +74,24 @@ pip install -r requirements.txt
 ### LCEL Implementation
 ```python
 # Example code snippet for LCEL
+# (To be added with actual implementation)
+```
+
+### Tagging and Extraction
+```python
+# Example code snippet for tagging and extraction
+# (To be added with actual implementation)
+```
+
+### Tools and Routing
+```python
+# Example code snippet for tools and routing
+# (To be added with actual implementation)
+```
+
+### Conversational Agent
+```python
+# Example code snippet for conversational agent
 # (To be added with actual implementation)
 ```
 
