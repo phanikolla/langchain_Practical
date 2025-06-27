@@ -30,14 +30,29 @@ This repository contains practical implementations and examples of various LangC
 - Data validation and cleaning
 - Integration with various data sources
 
+### 4. Tools & Routing APIs
+- Creation and registration of custom tools for LangChain agents
+- Defining robust input schemas using Pydantic
+- Real-world API integration (e.g., Open-Meteo for weather)
+- Wikipedia search tool with error handling
+- Formatting tools for OpenAI function calling and OpenAPI specs
+
+### 5. Conversational Agent
+- Building a multi-turn conversational agent using LangChain
+- Integrating custom tools (weather, Wikipedia search) into the agent
+- Using prompts, scratchpads, and output parsers for dynamic conversations
+- Chaining user input, tool invocation, and agent responses
+
 ## 📋 Project Structure
 
 ```
 langchain_Practical/
-├── function-calling.ipynb    # Function calling implementations
-├── openai_functions.ipynb    # OpenAI function calling examples
-├── lcel.ipynb               # LangChain Expression Language examples
-└── tagging-and-extraction.ipynb  # Tagging and extraction examples
+├── function-calling.ipynb             # Function calling implementations
+├── openai_functions.ipynb             # OpenAI function calling examples
+├── lcel.ipynb                        # LangChain Expression Language examples
+├── tagging-and-extraction.ipynb       # Tagging and extraction examples
+├── tools-routing-apis.ipynb           # Custom tools and API routing examples
+└── functional_conversation-agent.ipynb # Conversational agent with tool integration
 ```
 
 ## 🚀 Getting Started
@@ -63,20 +78,97 @@ pip install -r requirements.txt
 
 ### Function Calling
 ```python
-# Example code snippet for function calling
-# (To be added with actual implementation)
+from pydantic import BaseModel, Field
+from langchain.utils.openai_functions import convert_pydantic_to_openai_function
+from langchain.chat_models import ChatOpenAI
+
+class WeatherSearch(BaseModel):
+    """Call this with an airport code to get the weather at that airport"""
+    airport_code: str = Field(description="airport code to get weather for")
+
+weather_function = convert_pydantic_to_openai_function(WeatherSearch)
+model = ChatOpenAI()
+
+# Invoke the model with the function
+response = model.invoke("what is the weather in SF today?", functions=[weather_function])
+print(response)
 ```
 
 ### LCEL Implementation
 ```python
-# Example code snippet for LCEL
-# (To be added with actual implementation)
+from langchain.prompts import ChatPromptTemplate
+from langchain.chat_models import ChatOpenAI
+from langchain.schema.output_parser import StrOutputParser
+
+# Simple chain: prompt -> model -> output parser
+prompt = ChatPromptTemplate.from_template("tell me a short joke about {topic}")
+model = ChatOpenAI()
+output_parser = StrOutputParser()
+
+chain = prompt | model | output_parser
+result = chain.invoke({"topic": "bears"})
+print(result)
 ```
 
 ### Tagging and Extraction
 ```python
-# Example code snippet for tagging and extraction
-# (To be added with actual implementation)
+from pydantic import BaseModel, Field
+from langchain.utils.openai_functions import convert_pydantic_to_openai_function
+from langchain.prompts import ChatPromptTemplate
+from langchain.chat_models import ChatOpenAI
+from langchain.output_parsers.openai_functions import JsonOutputFunctionsParser
+
+class Tagging(BaseModel):
+    """Tag the piece of text with particular info."""
+    sentiment: str = Field(description="sentiment of text, should be `pos`, `neg`, or `neutral`")
+    language: str = Field(description="language of text (should be ISO 639-1 code)")
+
+tagging_function = convert_pydantic_to_openai_function(Tagging)
+model = ChatOpenAI(temperature=0).bind(functions=[tagging_function], function_call={"name": "Tagging"})
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "Think carefully, and then tag the text as instructed"),
+    ("user", "{input}")
+])
+tagging_chain = prompt | model | JsonOutputFunctionsParser()
+
+result = tagging_chain.invoke({"input": "I love langchain"})
+print(result)
+```
+
+### Tools & Routing APIs
+```python
+from langchain.agents import tool
+from pydantic import BaseModel, Field
+
+class OpenMeteoInput(BaseModel):
+    latitude: float = Field(..., description="Latitude of the location")
+    longitude: float = Field(..., description="Longitude of the location")
+
+@tool(args_schema=OpenMeteoInput)
+def get_current_temperature(latitude: float, longitude: float) -> str:
+    """Fetch current temperature for given coordinates."""
+    # ... API call logic ...
+    return f"The current temperature is ...°C"
+```
+
+### Conversational Agent
+```python
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+from langchain.tools.render import format_tool_to_openai_function
+from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
+
+# Define tools and format for OpenAI
+functions = [format_tool_to_openai_function(f) for f in tools]
+model = ChatOpenAI(temperature=0).bind(functions=functions)
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are helpful but sassy assistant"),
+    ("user", "{input}"),
+])
+chain = prompt | model | OpenAIFunctionsAgentOutputParser()
+
+result = chain.invoke({"input": "what is the weather in sf?"})
+print(result)
 ```
 
 ## 🎯 Key Features
